@@ -1,41 +1,25 @@
 package com.example.BlogApplication.model;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
-import lombok.AllArgsConstructor;
 import lombok.Data;
-import lombok.NoArgsConstructor;
-import org.hibernate.annotations.CreationTimestamp;
-import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
 
 @Entity
 @Table(name = "comments")
 @Data
-@AllArgsConstructor
-@NoArgsConstructor
 public class Comment{
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
-
-    @Column(nullable = false)
-    private String name;
-
-    private String email;
-
-    @Lob
-    private String comment;
-
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "post_id")
+    private int id;
+    @JsonBackReference
+    @ManyToOne
     private Post post;
-
-    @CreationTimestamp
+    private String name;
+    private String email;
+    private String comment;
     private LocalDateTime createdAt;
-
-    @UpdateTimestamp
     private LocalDateTime updatedAt;
-
 }
