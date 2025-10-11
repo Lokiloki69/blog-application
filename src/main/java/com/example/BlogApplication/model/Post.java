@@ -38,7 +38,7 @@ public class Post{
 
     private LocalDateTime publishedAt;
 
-    private boolean isPublished;
+    private boolean isPublished=false;
 
     @CreationTimestamp
     private LocalDateTime createAt;
@@ -53,4 +53,13 @@ public class Post{
             inverseJoinColumns = @JoinColumn(name = "tag_id")
     )
     private Set<Tag> tags = new HashSet<>();
+
+    public Post(String title, String excerpt, String content) {
+        this.title = title;
+        this.excerpt = excerpt;
+        this.content = content;
+        this.isPublished = true;
+        this.publishedAt = LocalDateTime.now();
+    }
+
 }
