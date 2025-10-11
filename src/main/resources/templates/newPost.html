@@ -1,129 +1,51 @@
 <!DOCTYPE html>
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
-    <title>Create or Edit Post</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            color: #000;
-            background-color: #fff;
-            margin: 0;
-            padding: 0;
-        }
-        header {
-            background-color: #f0f0f0;
-            padding: 10px 20px;
-            border-bottom: 1px solid #ccc;
-        }
-        nav div {
-            display: flex;
-            justify-content: center;
-            gap: 20px;
-        }
-        nav a {
-            color: black;
-            text-decoration: none;
-            font-weight: bold;
-            padding: 5px 10px;
-        }
-        nav a:hover {
-            background-color: #ddd;
-            border-radius: 4px;
-        }
-        main {
-            max-width: 600px;
-            margin: 40px auto;
-            padding: 0 20px;
-            text-align: center;
-        }
-        h1 {
-            font-size: 2em;
-            margin-bottom: 20px;
-        }
-        form {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        label {
-            display: flex;
-            justify-content: flex-start;
-            font-weight: bold;
-            margin-bottom: 5px;
-        }
-        input[type="text"],
-        textarea,
-        select,
-        button {
-            font-family: inherit;
-            font-size: 1em;
-        }
-        input[type="text"],
-        textarea,
-        select {
-            padding: 5px;
-            border: 1px solid #000;
-            border-radius: 2px;
-        }
-        button {
-            padding: 8px;
-            border: 1px solid #000;
-            border-radius: 2px;
-            cursor: pointer;
-            background: none;
-        }
-        button:hover {
-            background-color: #eee;
-        }
-        .button-group {
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-        }
-        .button-group button {
-            flex: 1;
-        }
-    </style>
+    <meta charset="utf-8">
+    <title th:text="${post.id != null ? 'Edit Post' : 'New Post'}">Blog Post</title>
+    <link rel="stylesheet"
+          href="https://cdn.jsdelivr.net/npm/bootstrap@4.0.0/dist/css/bootstrap.min.css"
+          integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm"
+          crossorigin="anonymous">
 </head>
-<body>
-<header>
-    <nav>
-        <div>
-            <a href="/">Home</a>
-            <a href="/available-posts">Available Posts</a>
-            <a href="/newpost">Create Post</a>
-        </div>
-    </nav>
-</header>
-<main>
-    <form th:action="@{${post} != null and ${post.id} != null ? '/posts/' + ${post.id} + '/edit' : '/create-post'}" th:method="post">
-        <h1 th:text="${post.id != null ? 'Edit Post' : 'Create Post'}">Create Post</h1>
 
-        <label for="title">Title:</label>
-        <input type="text" id="title" name="title" th:value="${post.title}" placeholder="Enter the title" required>
+<body class="bg-light">
+<div class="container mt-5">
+    <a href="/home" class="btn btn-link mb-3">&larr; Back to all posts</a>
 
-        <label for="excerpt">Excerpt:</label>
-        <input type="text" id="excerpt" name="excerpt" th:value="${post.excerpt}" placeholder="Enter the excerpt" required>
+    <div class="card shadow-sm p-4">
+        <h2 class="mb-4 text-center" th:text="${post.id != null ? 'Edit Blog Post' : 'Create New Blog Post'}"></h2>
 
-        <label for="content">Content:</label>
-        <textarea id="content" name="content" rows="5" th:text="${post.content}" placeholder="Enter the content" required></textarea>
+        <form th:action="${post.id != null} ? @{/updatePost} : @{/savePost}"
+              th:object="${post}"
+              method="post">
 
-        <label for="author">Author:</label>
-        <input type="text" id="author" name="author" th:value="${post.author}" placeholder="Enter the author name" required>
+            <input type="hidden" th:field="*{id}">
 
-        <label for="tags">Tags:</label>
-        <select name="tagIds" id="tags" multiple>
-            <th:block th:each="tag : ${tags}">
-                <option th:value="${tag.id}" th:text="${tag.name}"
-                        th:selected="${post.tags.contains(tag) ? 'selected' : ''}"></option>
-            </th:block>
-        </select>
+            <div class="form-group">
+                <label for="title">Title</label>
+                <input id="title" type="text" class="form-control" th:field="*{title}" placeholder="Enter blog title">
+            </div>
 
-        <div class="button-group">
-            <button type="submit" th:text="${post.id != null ? 'Update Post' : 'Submit'}">Submit</button>
-            <button type="submit" name="publish" value="true" th:text="${post.id != null ? 'Update and Publish' : 'Publish'}">Publish</button>
-        </div>
-    </form>
-</main>
+            <div class="form-group">
+                <label for="tags">Tags</label>
+                <input id="tags" type="text" class="form-control" name="tagString"
+                       th:value="${tagString}" placeholder="Tags (comma separated)">
+            </div>
+
+            <div class="form-group">
+                <label for="content">Content</label>
+                <textarea id="content" class="form-control" rows="8"
+                          th:field="*{content}" placeholder="Write your blog here..."></textarea>
+            </div>
+
+            <div class="text-center mt-4">
+                <button type="submit" class="btn btn-success px-4">
+                    <span th:text="${post.id != null ? 'Update Post' : 'Publish Post'}"></span>
+                </button>
+            </div>
+        </form>
+    </div>
+</div>
 </body>
 </html>
