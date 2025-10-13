@@ -9,6 +9,7 @@ import com.example.BlogApplication.service.PostService;
 import com.example.BlogApplication.service.TagService;
 import com.example.BlogApplication.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -31,10 +32,52 @@ public class PostController {
         this.commentService= commentService;
     }
 
+//    @GetMapping("/")
+//    public String homeRedirect() {
+//        return "redirect:/home";
+//    }
+
     @GetMapping("/")
-    public String homeRedirect() {
-        return "redirect:/home";
+    public String home(@RequestParam(value = "authorId", required = false) Long authorId,
+                       @RequestParam(value = "tagId", required = false) List<Long> tagIds,
+                       @RequestParam(value = "query", required = false) String query,
+                       @RequestParam(value = "sort", required = false) String sortOrder,
+                       Model model) {
+
+        model.addAttribute("authors", userService.getAllUsers());
+        model.addAttribute("allTags", tagService.getAllTags());
+
+        Sort sort= Sort.unsorted();
+        if("old".equalsIgnoreCase(sortOrder)){
+            sort=Sort.by(Sort.Direction.ASC,"publishedAt");
+        }
+        else if("new".equalsIgnoreCase(sortOrder)){
+            sort = Sort.by(Sort.Direction.DESC,"publishedAt");
+        }
+        else if("title".equalsIgnoreCase(sortOrder)){
+            sort = Sort.by(Sort.Direction.ASC,"title");
+        }
+
+        List<Post> posts;
+        if(query != null && !query.trim().isEmpty()){
+            posts=postService.searchPosts(query,sort);
+            authorId = null;
+            tagIds = null;
+        } else if(authorId != null || (tagIds != null && !tagIds.isEmpty())) {
+            posts = postService.getPostsByAuthorAndTags(authorId,tagIds,sort);
+        } else {
+            posts = postService.getAllPosts(sort);
+        }
+
+        model.addAttribute("posts",posts);
+        model.addAttribute("searchQuery",query);
+        model.addAttribute("sortOrder",sortOrder);
+        model.addAttribute("authorId", authorId);
+        model.addAttribute("tagIds", tagIds);
+
+        return "home";
     }
+
 
     @GetMapping("/newpost")
     public String showPostForm(Model model) {
@@ -52,12 +95,6 @@ public class PostController {
         return "redirect:/home";
     }
 
-    @GetMapping("/home")
-    public String listPosts(Model model) {
-        List<Post> posts = postService.getAllPosts();
-        model.addAttribute("posts", posts);
-        return "home";
-    }
 
     @GetMapping("/post/{id}")
     public String viewPost(@PathVariable("id") Long id, Model model) {
@@ -116,14 +153,4 @@ public class PostController {
         return "redirect:/post/" + postId;
     }
 
-
-    @GetMapping("/home/search")
-    public String searchPosts(@RequestParam("query") String query,Model model){
-        List<Post> result = postService.searchPosts(query);
-        model.addAttribute("posts", result);
-        model.addAttribute("searchQuery",query);
-
-        return "home";
-
-    }
 }

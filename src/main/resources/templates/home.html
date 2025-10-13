@@ -47,7 +47,7 @@
 <body>
 <div class="top-bar">
     <div>
-        <a href="/home" class="button">Home</a>
+        <a href="/" class="button">Home</a>
     </div>
     <div>
         <a href="/newpost" class="button">New Post</a>
@@ -55,14 +55,45 @@
 </div>
 
 <div class="search-sort-bar">
-    <form th:action="@{/home}" method="get" style="display:inline-flex; gap:8px; align-items:center;">
+    <form th:action="@{/?}" method="get" style="display:inline-flex; gap:8px; align-items:center;">
         <input type="text" name="query" th:value="${searchQuery}" placeholder="Search posts..." />
+        <button type="submit">Apply</button>
+    </form>
+    <form th:action="@{/?}" method="get" style="display:inline-flex; gap:8px; align-items:center;">
+        <input type="hidden" name="query" th:if="${searchQuery != null and searchQuery != ''}" th:value="${searchQuery}">
+
         <select name="sort">
             <option value="">Sort</option>
             <option value="new" th:selected="${sortOrder == 'new'}">New to Old</option>
             <option value="old" th:selected="${sortOrder == 'old'}">Old to New</option>
             <option value="title" th:selected="${sortOrder == 'title'}">Title A-Z</option>
         </select>
+
+        <div th:if="${param.tagId != null}">
+            <input type="hidden" name="tagId" th:each="t : ${param.tagId}" th:value="${t}">
+        </div>
+        <div th:if="${param.authorId != null}">
+            <input type="hidden" name="authorId" th:each="a : ${param.authorId}" th:value="${a}">
+        </div>
+        <button type="submit">Apply</button>
+    </form>
+    <form th:action="@{/?}" method="get" style="display:flex; gap:10px; align-items:center;">
+        <input type="hidden" name="query" th:if="${searchQuery != null and searchQuery != ''}" th:value="${searchQuery}">
+        <input type="hidden" name="sort" th:if="${sortOrder != null and sortOrder != ''}" th:value="${sortOrder}">
+        <label for="authorId">Author</label>
+        <select id="authorId" name="authorId" multiple>
+            <option value="">All</option>
+            <option th:each="user : ${authors}" th:value="${user.id}" th:selected="${authorId == user.id}" th:text="${user.name}"></option>
+        </select>
+
+
+        <label for="tagId">Tags</label>
+        <select id="tagId" name="tagId" multiple >
+            <option th:each="tag : ${allTags}" th:value="${tag.id}"
+                    th:selected="${tagIds != null ? tagIds.contains(tag.id) : false}"
+                    th:text="${tag.name}"></option>
+        </select>
+
         <button type="submit">Apply</button>
     </form>
 
