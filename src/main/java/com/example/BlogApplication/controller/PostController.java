@@ -1,8 +1,10 @@
 package com.example.BlogApplication.controller;
 
+import com.example.BlogApplication.model.Comment;
 import com.example.BlogApplication.model.Post;
 import com.example.BlogApplication.model.Tag;
 import com.example.BlogApplication.model.User;
+import com.example.BlogApplication.service.CommentService;
 import com.example.BlogApplication.service.PostService;
 import com.example.BlogApplication.service.TagService;
 import com.example.BlogApplication.service.UserService;
@@ -19,12 +21,14 @@ public class PostController {
     private final PostService postService;
     private final TagService tagService;
     private final UserService userService;
+    private final CommentService commentService;
 
     @Autowired
-    public PostController(PostService postService, TagService tagService, UserService userService) {
+    public PostController(PostService postService, TagService tagService, UserService userService,CommentService commentService) {
         this.postService = postService;
         this.tagService = tagService;
         this.userService = userService;
+        this.commentService= commentService;
     }
 
     @GetMapping("/")
@@ -61,7 +65,10 @@ public class PostController {
         if (post == null) {
             return "redirect:/home";
         }
+        List<Comment> comments =commentService.getCommentsByPostId(id);
         model.addAttribute("post", post);
+        model.addAttribute("comments",comments);
+        model.addAttribute("newComment",new Comment());
         return "viewPost";
     }
 
@@ -96,5 +103,27 @@ public class PostController {
     public String deletePost(@PathVariable Long id) {
         postService.deletePostById(id);
         return "redirect:/home";
+    }
+
+    @PostMapping("/post/{id}/comment")
+    public String addComment(@PathVariable("id") Long postId,
+                             @ModelAttribute("newComment") Comment comment) {
+
+        Post post = postService.getPostById(postId);
+//        comment.setId(null);
+        comment.setPost(post);
+        commentService.saveComment(comment);
+        return "redirect:/post/" + postId;
+    }
+
+
+    @GetMapping("/home/search")
+    public String searchPosts(@RequestParam("query") String query,Model model){
+        List<Post> result = postService.searchPosts(query);
+        model.addAttribute("posts", result);
+        model.addAttribute("searchQuery",query);
+
+        return "home";
+
     }
 }

@@ -61,4 +61,14 @@ public class PostServiceImpl implements PostService {
         postRepo.deleteById(id);
 
     }
+
+    @Override
+    public List<Post> searchPosts(String query) {
+        if(query == null || query.trim().isEmpty()){
+            return postRepo.findAll();
+        }
+
+        query = "%" +query.toLowerCase() +"%";
+        return postRepo.findBySearchQuery(query);
+    }
 }

@@ -8,4 +8,6 @@ public interface PostService {
     Post getPostById(Long id);
     List<Post> getAllPosts();
     void deletePostById(Long id);
+
+    List<Post> searchPosts(String query);
 }

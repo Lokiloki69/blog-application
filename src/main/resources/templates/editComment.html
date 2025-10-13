@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Edit Comment</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background: white;
+            color: black;
+            max-width: 700px;
+            margin: 40px auto;
+        }
+        a, button {
+            background: gray;
+            color: white;
+            border: none;
+            padding: 6px 12px;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        a:hover, button:hover { opacity: 0.8; }
+        form { display: flex; flex-direction: column; gap: 10px; }
+        input, textarea { width: 100%; padding: 6px; }
+        label { font-weight: bold; }
+    </style>
+</head>
+<body>
+<a th:href="@{'/post/' + ${comment.post.id}}">&larr; Back to Post</a>
+
+<h3>Edit Comment</h3>
+<form th:action="@{'/comment/update/' + ${comment.id}}" th:object="${comment}" method="post">
+    <label for="name">Name</label>
+    <input id="name" type="text" th:field="*{name}" required>
+
+    <label for="email">Email</label>
+    <input id="email" type="email" th:field="*{email}" required>
+
+    <label for="comment">Comment</label>
+    <textarea id="comment" th:field="*{commentContent}" rows="3" required></textarea>
+
+    <button type="submit">Update</button>
+</form>
+</body>
+</html>
