@@ -4,6 +4,8 @@ import com.example.BlogApplication.model.Post;
 import com.example.BlogApplication.model.Tag;
 import com.example.BlogApplication.repo.PostRepo;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
@@ -65,34 +67,36 @@ public class PostServiceImpl implements PostService {
     }
 
     @Override
-    public List<Post> searchPosts(String query, Sort sort) {
+    public Page<Post> getAllPosts(Pageable pageable) {
+        return postRepo.findAll(pageable);
+    }
+
+    @Override
+    public Page<Post> searchPosts(String query, Pageable pageable) {
         if (query == null || query.trim().isEmpty() || query.isBlank()) {
-            return getAllPosts(sort);
+            return postRepo.findAll(pageable);
         }
         String kw = query.trim();
         kw = "%" + kw.toLowerCase()+"%";
 
-        return postRepo.findBySearchQuery(kw,sort);
+        return postRepo.searchByTitleContentAuthorTags(kw,pageable);
     }
 
     @Override
-    public List<Post> getPostsByAuthorAndTags(Long authorId, List<Long> tagIds,Sort sort) {
-        boolean hasAuthor = (authorId != null);
+    public Page<Post> getPostsByAuthorAndTags(List<Long> authorIds, List<Long> tagIds, Pageable pageable) {
+        boolean hasAuthor = (authorIds != null && !authorIds.isEmpty());
         boolean hasTags = (tagIds != null && !tagIds.isEmpty());
 
-        List<Post> result;
-
         if(hasAuthor && hasTags){
-            result = postRepo.findDistinctByUser_IdAndTags_IdIn(authorId, tagIds);
+            return postRepo.findByUsersAndTags(authorIds, tagIds, pageable);
         }
         else if(hasAuthor){
-            result = postRepo.findDistinctByUser_Id(authorId);
+            return postRepo.findDistinctByUserIds(authorIds,pageable);
         } else if(hasTags) {
-            result = postRepo.findDistinctByTags_IdIn(tagIds);
+            return postRepo.findDistinctByTags_IdIn(tagIds,pageable);
         }
         else {
-            result = getAllPosts(sort);
+            return postRepo.findAll(pageable);
         }
-        return result;
     }
 }

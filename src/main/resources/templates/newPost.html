@@ -13,7 +13,7 @@
     </style>
 </head>
 <body>
-<a href="/home">&larr; Back to all posts</a>
+<a href="/">&larr; Back to all posts</a>
 <h2 th:text="${post.id != null ? 'Edit Blog Post' : 'Create New Blog Post'}"></h2>
 
 <form th:action="${post.id != null} ? @{/updatePost} : @{/savePost}" th:object="${post}" method="post">

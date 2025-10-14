@@ -24,6 +24,12 @@ public class User {
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Post> posts = new ArrayList<>();
 
+//    public User(String name, String email, String password) {
+//        this.name = name;
+//        this.email = email;
+//        this.password = password;
+//    }
+
     public Long getId() { return id; }
     public void setId(Long id) { this.id = id; }
 

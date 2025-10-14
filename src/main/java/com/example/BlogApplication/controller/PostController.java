@@ -9,12 +9,16 @@ import com.example.BlogApplication.service.PostService;
 import com.example.BlogApplication.service.TagService;
 import com.example.BlogApplication.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Random;
 
 @Controller
 public class PostController {
@@ -38,10 +42,12 @@ public class PostController {
 //    }
 
     @GetMapping("/")
-    public String home(@RequestParam(value = "authorId", required = false) Long authorId,
+    public String home(@RequestParam(value = "authorId", required = false) List<Long> authorIds,
                        @RequestParam(value = "tagId", required = false) List<Long> tagIds,
                        @RequestParam(value = "query", required = false) String query,
                        @RequestParam(value = "sort", required = false) String sortOrder,
+                       @RequestParam(value = "start", defaultValue = "1") int start,
+                       @RequestParam(value = "limit", defaultValue = "10") int limit,
                        Model model) {
 
         model.addAttribute("authors", userService.getAllUsers());
@@ -58,21 +64,28 @@ public class PostController {
             sort = Sort.by(Sort.Direction.ASC,"title");
         }
 
-        List<Post> posts;
+        int pageNumber = (start -1)/limit;
+        Pageable pageable = PageRequest.of(pageNumber,limit,sort);
+        Page<Post> postsPage;
+
         if(query != null && !query.trim().isEmpty()){
-            posts=postService.searchPosts(query,sort);
-            authorId = null;
+            postsPage =postService.searchPosts(query,pageable);
+            authorIds = null;
             tagIds = null;
-        } else if(authorId != null || (tagIds != null && !tagIds.isEmpty())) {
-            posts = postService.getPostsByAuthorAndTags(authorId,tagIds,sort);
+        } else if((authorIds != null && !authorIds.isEmpty()) || (tagIds != null && !tagIds.isEmpty())) {
+            postsPage = postService.getPostsByAuthorAndTags(authorIds,tagIds,pageable);
         } else {
-            posts = postService.getAllPosts(sort);
+            postsPage = postService.getAllPosts(pageable);
         }
 
-        model.addAttribute("posts",posts);
+        model.addAttribute("posts",postsPage.getContent());
+        model.addAttribute("currentPage",pageNumber+1);
+        model.addAttribute("totalPages",postsPage.getTotalPages());
+        model.addAttribute("limit",limit);
+        model.addAttribute("start",start);
         model.addAttribute("searchQuery",query);
         model.addAttribute("sortOrder",sortOrder);
-        model.addAttribute("authorId", authorId);
+        model.addAttribute("authorIds", authorIds);
         model.addAttribute("tagIds", tagIds);
 
         return "home";
@@ -89,10 +102,13 @@ public class PostController {
     @PostMapping("/savePost")
     public String savePost(@ModelAttribute("post") Post post,
                            @RequestParam("tagString") String tagString) {
-        User user = userService.findById(1L);
+//        User user = userService.findById(1L);
+        Random random = new Random();
+        long randomUserId = 1 + random.nextInt(9); // Generates 1 to 9 inclusive
+        User user = userService.findById(randomUserId);
         post.setUser(user);
         postService.savePost(post, tagString);
-        return "redirect:/home";
+        return "redirect:/";
     }
 
 
@@ -100,7 +116,7 @@ public class PostController {
     public String viewPost(@PathVariable("id") Long id, Model model) {
         Post post = postService.getPostById(id);
         if (post == null) {
-            return "redirect:/home";
+            return "redirect:/";
         }
         List<Comment> comments =commentService.getCommentsByPostId(id);
         model.addAttribute("post", post);
@@ -113,7 +129,7 @@ public class PostController {
     public String editPost(@PathVariable Long id, Model model) {
         Post post = postService.getPostById(id);
         if (post == null) {
-            return "redirect:/home";
+            return "redirect:/";
         }
 
         String tagString = post.getTags().stream()
@@ -133,13 +149,13 @@ public class PostController {
         User user = userService.findById(1L);
         post.setUser(user);
         postService.savePost(post, tagString);
-        return "redirect:/home";
+        return "redirect:/";
     }
 
     @GetMapping("/deletePost/{id}")
     public String deletePost(@PathVariable Long id) {
         postService.deletePostById(id);
-        return "redirect:/home";
+        return "redirect:/";
     }
 
     @PostMapping("/post/{id}/comment")

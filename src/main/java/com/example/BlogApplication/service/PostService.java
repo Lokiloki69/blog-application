@@ -1,6 +1,8 @@
 package com.example.BlogApplication.service;
 
 import com.example.BlogApplication.model.Post;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 
 import java.util.List;
@@ -11,8 +13,7 @@ public interface PostService {
     List<Post> getAllPosts(Sort sort);
     void deletePostById(Long id);
 
-//    List<Post> searchPosts(String query);
-    List<Post> searchPosts(String query,Sort sort);
-
-    List<Post> getPostsByAuthorAndTags(Long authorId, List<Long> tagIds,Sort sort);
+    Page<Post> getAllPosts(Pageable pageable);
+    Page<Post> searchPosts(String query, Pageable pageable);
+    Page<Post> getPostsByAuthorAndTags(List<Long> authorIds, List<Long> tagIds,Pageable pageable);
 }
