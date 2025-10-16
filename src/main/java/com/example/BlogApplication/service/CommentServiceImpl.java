@@ -9,35 +9,31 @@ import java.util.List;
 
 @Service
 public class CommentServiceImpl implements CommentService{
-    private final CommentRepo commentRepo;
-
     @Autowired
-    public CommentServiceImpl(CommentRepo commentRepo) {
-        this.commentRepo = commentRepo;
-    }
+    private CommentRepo commentRepo;
 
     @Override
     public List<Comment> getCommentsByPostId(Long postId) {
-        return commentRepo.findByPostId(postId);
+        return commentRepo.findByPostIdOrderByCreatedAtDesc(postId);
     }
 
     @Override
-    public Comment getCommentById(Long id) {
-        return commentRepo.findById(id).orElse(null);
-    }
-
-    @Override
-    public void saveComment(Comment comment) {
-        commentRepo.save(comment);
-    }
-
-    @Override
-    public void updateComment(Comment comment) {
-        commentRepo.save(comment);
+    public Comment saveComment(Comment comment) {
+        return commentRepo.save(comment);
     }
 
     @Override
     public void deleteComment(Long id) {
         commentRepo.deleteById(id);
+    }
+
+    @Override
+    public Comment findById(Long id) {
+        return commentRepo.findById(id).orElse(null);
+    }
+
+    @Override
+    public Comment getCommentById(Long id) {
+        return commentRepo.findById(id).orElse(null);
     }
 }

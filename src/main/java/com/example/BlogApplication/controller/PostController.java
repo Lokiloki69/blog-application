@@ -13,6 +13,8 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
@@ -36,10 +38,6 @@ public class PostController {
         this.commentService= commentService;
     }
 
-//    @GetMapping("/")
-//    public String homeRedirect() {
-//        return "redirect:/home";
-//    }
 
     @GetMapping("/")
     public String home(@RequestParam(value = "authorId", required = false) List<Long> authorIds,
@@ -102,11 +100,16 @@ public class PostController {
     @PostMapping("/savePost")
     public String savePost(@ModelAttribute("post") Post post,
                            @RequestParam("tagString") String tagString) {
-//        User user = userService.findById(1L);
-        Random random = new Random();
-        long randomUserId = 1 + random.nextInt(9); // Generates 1 to 9 inclusive
-        User user = userService.findById(randomUserId);
-        post.setUser(user);
+
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
+            User user = userService.findByEmail(auth.getName());
+            post.setUser(user);
+        } else {
+            User user = userService.findById(1L);
+            post.setUser(user);
+        }
+
         postService.savePost(post, tagString);
         return "redirect:/";
     }
@@ -146,8 +149,14 @@ public class PostController {
     public String updatePost(@ModelAttribute("post") Post post,
                              @RequestParam("tagString") String tagString) {
 
-        User user = userService.findById(1L);
-        post.setUser(user);
+        Authentication auth = SecurityContextHolder.getContext().getAuthentication();
+        if (auth != null && auth.isAuthenticated() && !"anonymousUser".equals(auth.getPrincipal())) {
+            User user = userService.findByEmail(auth.getName());
+            post.setUser(user);
+        } else {
+            User user = userService.findById(1L);
+            post.setUser(user);
+        }
         postService.savePost(post, tagString);
         return "redirect:/";
     }
@@ -158,15 +167,5 @@ public class PostController {
         return "redirect:/";
     }
 
-    @PostMapping("/post/{id}/comment")
-    public String addComment(@PathVariable("id") Long postId,
-                             @ModelAttribute("newComment") Comment comment) {
-
-        Post post = postService.getPostById(postId);
-//        comment.setId(null);
-        comment.setPost(post);
-        commentService.saveComment(comment);
-        return "redirect:/post/" + postId;
-    }
 
 }

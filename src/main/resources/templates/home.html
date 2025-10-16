@@ -35,9 +35,28 @@
 <body>
 <div class="container">
     <div class="top-actions">
-        <a href="/" >Home</a>
+        <a href="/">Home</a>
         <a href="/newpost">New Post</a>
+
+        <div style="margin-left:auto; display:flex; align-items:center; gap:12px;">
+            <div th:if="${#authentication.principal != null and #authentication.name != 'anonymousUser'}">
+                <span>Welcome, <strong th:text="${#authentication.name}"></strong></span>
+                <form th:action="@{/logout}" method="post" style="display:inline;">
+                    <button type="submit"
+                            style="background:#f5f5f5; border:1px solid #ccc; color:#151e57; padding:8px 16px; border-radius:3px; cursor:pointer;">
+                        Logout
+                    </button>
+                </form>
+            </div>
+
+            <div th:if="${#authentication.name == 'anonymousUser'}">
+                <a href="/login">Login</a>
+                <a href="/signup">Signup</a>
+            </div>
+        </div>
     </div>
+
+
 
     <form th:action="@{/?}" method="get" class="inline-filters" style="display:inline-flex; gap:8px; align-items:center;">
         <input type="text" name="query" th:value="${searchQuery}" placeholder="Search posts..."/>
@@ -105,9 +124,17 @@
             </div>
             <div th:each="post : ${posts}" class="post-card">
                 <h3 th:text="${post.title}"></h3>
-                <p class="author"><strong th:text="${post.user != null ? post.user.name : 'Anonymous'}"></strong></p>
+                <p class="author">
+                    <strong th:text="${post.user != null ? post.user.name : 'Anonymous'}"></strong>
+                    &nbsp;•&nbsp;
+                    <span th:text="${#dates.format(post.publishedAt, 'dd MMM yyyy, hh:mm a')}"></span>
+                </p>
+
                 <p class="excerpt" th:text="${post.excerpt}"></p>
                 <a th:href="@{'/post/' + ${post.id}}" class="read-btn">Read</a>
+
+                    <span th:each="tag : ${post.tags}" th:text="'(' +${tag.name} + ')'+' '" style="font-style: italic;"></span>
+
             </div>
 
             <div class="pagination">
