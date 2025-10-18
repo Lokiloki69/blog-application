@@ -16,4 +16,5 @@ public interface PostService {
     Page<Post> getAllPosts(Pageable pageable);
     Page<Post> searchPosts(String query, Pageable pageable);
     Page<Post> getPostsByAuthorAndTags(List<Long> authorIds, List<Long> tagIds,Pageable pageable);
+    boolean isOwner(Long postId, String email);
 }

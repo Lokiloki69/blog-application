@@ -5,6 +5,7 @@ import com.example.BlogApplication.repo.TagRepo;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -31,4 +32,24 @@ public class TagServiceImpl implements TagService {
     public List<Tag> getAllTags() {
         return tagRepo.findAll();
     }
+
+    @Override
+    public List<Tag> processTags(String tagString) {
+        if (tagString == null || tagString.trim().isEmpty()) return new ArrayList<>();
+
+        String[] tagNames = tagString.split(",");
+        List<Tag> tags = new ArrayList<>();
+
+        for (String name : tagNames) {
+            Tag tag = tagRepo.findByNameIgnoreCase(name.trim());
+            if (tag == null) {
+                tag = new Tag();
+                tag.setName(name.trim());
+                tagRepo.save(tag);
+            }
+            tags.add(tag);
+        }
+        return tags;
+    }
+
 }

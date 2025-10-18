@@ -7,4 +7,6 @@ import java.util.Optional;
 
 public interface TagRepo extends JpaRepository<Tag,Long>{
     Optional<Tag> findByName(String name);
+
+    Tag findByNameIgnoreCase(String trim);
 }

@@ -14,7 +14,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 
-@Service
+@Service("postService")
 public class PostServiceImpl implements PostService {
 
     private final PostRepo postRepo;
@@ -28,19 +28,7 @@ public class PostServiceImpl implements PostService {
 
     @Override
     public void savePost(Post post,String tagString) {
-
-        String[] tagNames = tagString.split(",");
-        List<Tag> tagList = new ArrayList<>();
-
-        for (String tagName : tagNames) {
-            tagName = tagName.trim();
-            Tag tag = tagService.findTagByName(tagName);
-            if (tag == null) {
-                tag = new Tag(tagName);
-                tagService.saveTag(tag);
-            }
-            tagList.add(tag);
-        }
+        List<Tag> tagList = tagService.processTags(tagString);
         post.setTags(tagList);
 
         String content = post.getContent();
@@ -99,4 +87,12 @@ public class PostServiceImpl implements PostService {
             return postRepo.findAll(pageable);
         }
     }
+
+    @Override
+    public boolean isOwner(Long postId, String email) {
+        Post post = getPostById(postId);
+        if (post == null || post.getUser() == null) return false;
+        return post.getUser().getEmail().equals(email);
+    }
+
 }

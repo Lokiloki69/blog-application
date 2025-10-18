@@ -7,4 +7,5 @@ public interface TagService {
     Tag findTagByName(String name);
     void saveTag(Tag tag);
     List<Tag> getAllTags();
+    List<Tag> processTags(String tagString);
 }

@@ -13,6 +13,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.codec.cbor.Jackson2CborDecoder;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Controller;
@@ -127,6 +128,7 @@ public class PostController {
         model.addAttribute("newComment",new Comment());
         return "viewPost";
     }
+
 
     @GetMapping("/editPost/{id}")
     public String editPost(@PathVariable Long id, Model model) {
